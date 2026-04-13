@@ -14,15 +14,15 @@ def build_surface_code(rounds, p=0.001):
     #   q_3(2,0)  q_4(2,2)  q_5(2,4)
     #   q_6(4,0)  q_7(4,2)  q_8(4,4)
 
-    # ALL 16 X×Z stabiliser pairs share 0 or 2 data qubits
+    # ALL 16 X×Z stabilizer pairs share 0 or 2 data qubits
     
-    # X stabilisers (ancilla->data, ancilla starts |+>):
+    # X stabilizers (ancilla->data, ancilla starts |+>):
     #   anc  9  (0,1) -> X_0X_1            (top boundary, weight-2)
     #   anc 20 (4,3) -> X_7X_8            (bottom boundary, weight-2)
     #   anc 22 (1,3) -> X_1X_2X_4X_5 
     #   anc 23 (3,1) -> X_3X_4X_6X_7 
     #
-    # Z stabilisers (data->ancilla, ancilla starts |0>):
+    # Z stabilizers (data->ancilla, ancilla starts |0>):
     #   anc 13 (1,4) -> Z_2Z_5            (right boundary, weight-2)
     #   anc 16 (3,0) -> Z_3Z_6            (left boundary, weight-2)
     #   anc 21 (1,1) -> Z_0Z_1Z_3Z_4       
@@ -50,8 +50,8 @@ def build_surface_code(rounds, p=0.001):
         circuit.append("QUBIT_COORDS", [q], coord)
 
     # ancillas and their role
-    x_ancillas = [9, 20, 22, 23]    # X-type stabilisers
-    z_ancillas = [13, 16, 21, 24]   # Z-type stabilisers
+    x_ancillas = [9, 20, 22, 23]    # X-type stabilizers
+    z_ancillas = [13, 16, 21, 24]   # Z-type stabilizers
     active_ancillas = sorted(x_ancillas + z_ancillas)  # [9,13,16,20,21,22,23,24]
 
     # i within the 16-ancilla window (ancilla_idx - 9)
@@ -127,10 +127,10 @@ def build_surface_code(rounds, p=0.001):
     # so from here we build our circuit
 
     # reset everything to |0>
-    # Z-ancillas start |0>  -> first Z-stabiliser measurement is deterministic
+    # Z-ancillas start |0>  -> first Z measurement is deterministic
 
     # X-ancillas start |0>  -> extract_syndromes immediately does H on them before
-    # any CNOT, putting them in |+>  -> first X-stabiliser measurement is also
+    # any CNOT, putting them in |+>  -> first X measurement is also
     # deterministic.  DO NOT add an extra H here or it double-cancels that's why 
     # the cnots were all fucked up
     circuit.append("R", range(25))
@@ -201,7 +201,7 @@ print(f"Corrected Failure Rate: {(error_amt / 10000) * 100:.4f}%")
 # first try part #
 # Test 1: 501/1024: was resetting data qubits each round
 # Test 2: 540/1024: CNOTs in wrong positions
-# Test 3: 509/1024: still ~50/50; decoder added but stabilisers invalid
+# Test 3: 509/1024: still ~50/50; decoder added but stabilizers invalid
 # Test 4: ValueError all X-faces + all Z-edges anti-commute
 # for some reason data qubits appeared 2 to 3 times per tick
 # Test 5: YOOOO 1 ERROR LESGOO
