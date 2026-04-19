@@ -84,33 +84,40 @@ if __name__ == '__main__':
     print("Exported reliability_gain.png")
     
     # visual 2: log gittings + threshold approx p=0.001
-    focus_p = 0.001
-    # nearest p computation from the logspace
-    closest_p = points[np.abs(points - focus_p).argmin()]
+    focus_ps = [1e-4, 1e-3, 1e-2, 1e-1]
     
-    fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+    fig, axes = plt.subplots(len(focus_ps), 3, figsize=(15, 12))
     
-    for i, r in enumerate(rounds):
-        sub = df[(df["rounds"] == r) & (np.isclose(df["p"], closest_p))]
-        gains = sub["gain"].values
+    for row_idx, focus_p in enumerate(focus_ps):
+        # nearest p computation from the logspace
+        closest_p = points[np.abs(points - focus_p).argmin()]
         
-        ax = axes[i]
-        ax.hist(gains, bins=15, density=True, alpha=0.6, color=colors[r])
-        
-        # log extraction module
-        if len(gains) > 0 and np.all(gains > 0):
-            shape, loc, scale = lognorm.fit(gains, floc=0)
-            x_val = np.linspace(min(gains)*0.8, max(gains)*1.2, 100)
-            pdf = lognorm.pdf(x_val, shape, loc=loc, scale=scale)
-            ax.plot(x_val, pdf, 'r-', linewidth=2)
+        for col_idx, r in enumerate(rounds):
+            sub = df[(df["rounds"] == r) & (np.isclose(df["p"], closest_p))]
+            gains = sub["gain"].values
             
-        ax.set_title(f"T={r} at p ~ {closest_p:.1e}")
-        ax.set_xlabel("Gain")
-        ax.set_ylabel("Density")
-        ax.legend()
-        
+            ax = axes[row_idx, col_idx]
+            ax.hist(gains, bins=15, density=True, alpha=0.6, color=colors[r])
+            
+            # log extraction module
+            if len(gains) > 0 and np.all(gains > 0):
+                shape, loc, scale = lognorm.fit(gains, floc=0)
+                x_val = np.linspace(min(gains)*0.8, max(gains)*1.2, 100)
+                pdf = lognorm.pdf(x_val, shape, loc=loc, scale=scale)
+                ax.plot(x_val, pdf, 'r-', linewidth=2)
+                
+            ax.set_title(f"T={r} at p ~ {closest_p:.1e}")
+            ax.set_xlabel("Gain")
+            ax.set_ylabel("Density")
+            if len(ax.get_legend_handles_labels()[0]) > 0:
+                ax.legend()
+            
     plt.tight_layout()
-    plt.savefig("results/gain_distribution_histograms.png")
+    # verify if directory results/ exists, otherwise just save to current
+    import os
+    if not os.path.exists("results"):
+        os.makedirs("results")
+    plt.savefig("results/gain_distribution_histograms_grid.png")
     plt.close()
-    print("Exported gain_distribution_histograms.png")
+    print("Exported gain_distribution_histograms_grid.png")
     print("All tasks completed.")
